@@ -1,0 +1,56 @@
+services:
+  products:
+    build:
+      context: ./api_produtos
+    container_name: products
+    ports:
+      - "3001:3001"
+    networks:
+      - ecommerce-net
+
+  orders:
+    build:
+      context: ./api_pedidos
+    container_name: orders
+    ports:
+      - "3002:3002"
+    depends_on:
+      - redis
+      - db
+      - products
+    networks:
+      - ecommerce-net
+
+  payments:
+    build:
+      context: ./api_pagamentos
+    container_name: payments
+    ports:
+      - "3003:3003"
+    depends_on:
+      - orders
+    networks:
+      - ecommerce-net
+
+  db:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: ecommerce
+    ports:
+      - "3306"
+    networks:
+      - ecommerce-net
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379"
+    networks:
+      - ecommerce-net
+
+networks:
+  ecommerce-net:
+    driver: bridge
